@@ -1,5 +1,22 @@
 import json
+import tomllib
+from lango import Lango
 class Runtime:
+  def l():
+    f = open("_config.toml", "r")
+    c = f.read()
+    data = tomllib.loads(c)
+    f.close()
+    return Lango.loadConfigFile(f"./lang/{data['lang']}.lang", "./lang/_msl.sch")
+  def lo():
+    class DictToObject:
+      def __init__(self, dictionary):
+        for key, value in dictionary.items():
+            if isinstance(value, dict):
+                setattr(self, key, DictToObject(value))
+            else:
+                setattr(self, key, value)
+    return DictToObject(Runtime.l())
   def vars():
     f = open('../gen/runtime.json')
     variables = json.loads(f.read())

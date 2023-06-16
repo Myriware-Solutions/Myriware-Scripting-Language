@@ -14,23 +14,24 @@ def runline(cmd):
     if (cmd == ""):
       return None
     cmdType = (re.search(r"^\w+(?=[<\s:])", cmd)).group()
+    lang_opts = (Runtime.lo()).runline.input
     match cmdType:
     # Match the diffent commands
 
     # Data-out type commands
-      case "raw":
+      case lang_opts.raw:
         # Prints out the raw value of the input (same as dump, but in json-ish format)
         out = cmd.split(":")[1].strip()
         Outter.out('pri', f"{Typer.parse(out)}")
-      case "dump":
+      case lang_opts.dump:
         # Prints out both the type of input and the value
         out = cmd.split(":")[1].strip()
         Outter.out('pri', f"<{Typer.parse(out)['type']}> {Typer.parse(out)['value']}")
-      case "echo":
+      case lang_opts.echo:
         # Prints out the value of the input
         out = cmd.split(":")[1].strip()
         Outter.out('pri', Typer.parse(out)['value'])
-      case "vardump":
+      case lang_opts.vardump:
         # Prints out all the contents of the Runtime
         vars = Runtime.vars().keys()
         for var_name in vars:
@@ -38,18 +39,18 @@ def runline(cmd):
           Outter.out('pri', f"{var_name}: <{var['type']}> {var['value']}")
 
     # Variable related commands
-      case "make":
+      case lang_opts.make:
         # Creates a variable
         varName = re.findall(r"^\w+(?=[<\s]).* (.*):", cmd)[0]
         out = cmd.split(":")
         Runtime.add(varName, Typer.parse(out[1].strip()))
-      case "break":
+      case lang_opts.remove:
         # Destroys a variable
         out = cmd.split(":")
         Runtime.remove(out[1])
 
     # MSL based commands
-      case "execute":
+      case lang_opts.execute:
         file_to = Typer.parse(cmd.split(":")[1])['value']
         os.system(f"python3 main.py {file_to}")
 

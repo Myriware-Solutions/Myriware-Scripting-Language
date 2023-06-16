@@ -1,0 +1,11 @@
+Ausführen der Live-Schnittstelle der Myriware Scripting Language (v0). Geben Sie zum Beenden jederzeit 'STOP' ein.
+
+STOPP
+
+KONFIG
+Starten des CONFIG-Editors. Geben Sie <Schlüssel> <true|false|string> ein. Geben Sie END ein, um den Vorgang zu beenden. WENN SIE NICHT WISSEN, WIE MAN DAS BENUTZT, BENUTZEN SIE ES NICHT.
+ENDE
+
+DATEI
+
+roh

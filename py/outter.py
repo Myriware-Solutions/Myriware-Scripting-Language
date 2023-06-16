@@ -22,6 +22,7 @@ class Outter:
     f = open("_config.toml", "r")
     c = f.read()
     data = tomllib.loads(c)
+    f.close()
     if (data[type]):
       match type:
         case "err":
