@@ -1,0 +1,5 @@
+make  Name:"Romeo";
+echo:@Name;
+make Array:["Mon amie!", "C'est?", `C'est! {Name}! Mon amie`];
+echo:@Array;
+# This is a sad love story

@@ -1,0 +1,4 @@
+Docuements are the thing that you can run the Script on. They are stored in files, created when called to. This is an example file, which seems to contain a Funny Joke.
+
+J: What did the frontend say to the backend?
+A: ajax_request: {"query": "question", "data": { "Q": "How are you?" }}
