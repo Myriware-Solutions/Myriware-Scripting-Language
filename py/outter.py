@@ -1,4 +1,7 @@
 import tomllib
+from runtime import Runtime
+
+Config = Runtime.loadConfig()
 
 # Reset
 Color_Off='\033[0m'       # Text Reset
@@ -19,11 +22,7 @@ Dark_Gray='\033[1;30m'     # Dark Gray
 
 class Outter:
   def out(type, msg):
-    f = open("_config.toml", "r")
-    c = f.read()
-    data = tomllib.loads(c)
-    f.close()
-    if (data[type]):
+    if (Config[type]):
       match type:
         case "err":
           print(f"{Red}{msg}{Color_Off}")
