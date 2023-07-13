@@ -1,3 +1,4 @@
+import json
 import re
 from outter  import Outter
 from runtime import Runtime
@@ -30,11 +31,18 @@ class Typer:
     # RuntimeVariable
     if (string.find(' ') == -1 and string[0] == '@'):
       var_name = re.findall(r"@([a-zA-Z]*)", string)[0].strip()
+      # Indexed Array
       if Runtime.vars()[var_name]["type"] == "Array" and string.find('[') != -1:
         Outter.out("sec", "Finding index of array")
         index = int(re.findall(r"\[([0-9]*)\]", string)[0])
         variable_type = Runtime.vars()[var_name]["value"][index]['type']
         value = Runtime.vars()[var_name]["value"][index]['value']
+      # indexed Object
+      if Runtime.vars()[var_name]["type"] == "Object" and string.find('[') != -1:
+        Outter.out("sec", "Finding index of object")
+        index = str(re.findall(r"\[([\w]*)\]", string)[0])
+        variable_type = 'any'
+        value = Runtime.vars()[var_name]["value"][index]
       else:
         variable_type = Runtime.vars()[var_name]["type"]
         value = Runtime.vars()[var_name]["value"]
@@ -42,6 +50,7 @@ class Typer:
     elif (string[0] == "\"" and string[len(string) - 1] == "\""):
       variable_type = 'String'
       value = re.sub(r"(?<!\\)\"", '', string)
+      value = re.sub(r"\\\"", '"', value)
     # String with variables
     elif (string[0] == "`" and string[len(string) - 1] == "`"):
       variable_type = 'String'
@@ -61,6 +70,9 @@ class Typer:
       for part in re.split(r"(?<!\\),", strip):
         returns.append(Typer.parse(part))
       value = returns
+    elif (string[0] == "{" and string[len(string) - 1] == "}"):
+      variable_type = "Object"
+      value = json.loads(string)
     # Function
     elif (string[0] == "(" and string[len(string) - 1] == ")"):
       strip = string[1:]
@@ -105,6 +117,12 @@ class Typer:
             load_file = open(file_name['value'], 'r')
             file_content = load_file.read()
             return {"type":"String", "value":file_content}
+      case "Json":
+        match functTree[1]:
+          case "parse":
+            stri = Typer.parse(functArguments[0].strip())['value']
+            Outter.out("sec", f"Trying to parse:{stri}")
+            return {'type':'Object', 'value':json.loads(stri)}
 
     # Single functions
       case "typeOf":
