@@ -1,10 +1,12 @@
 import socket
+import threading
+from outter import Outter
 
 # class ExternalConnections:
 #     # Class USP: wiki.python.org/moin/UdpCommunication
 #     class UDP:
 #         def send(ip: str, port: int, msg: str):
-#             print("Trying to send packet to destination")
+#             Outter.out("sec", "Trying to send packet to destination")
 #             byte_string = bytes(msg, 'utf-8')
 #             sock = socket.socket(socket.AF_INET, # Internet
 #                      socket.SOCK_DGRAM) # UDP
@@ -14,31 +16,36 @@ import socket
 #             sock = socket.socket(socket.AF_INET, # Internet
 #                      socket.SOCK_DGRAM) # UDP
 #             sock.bind((ip, port))
-#             print("Beginning to wait for message:")
+#             Outter.out("sec", "Beginning to wait for message:")
 #             while True:
 #                 data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-#                 print("received message: %s" % data)
+#                 Outter.out("sec", "received message: %s" % data)
 #                 break
 
 class ExternalConnections:
     class TCP:
-        def send(ip: str, port: int, msg: str):
+        def send(ip: str, port: int, msg: str, local_port: int):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = (ip, port)
+            local_address = ('', local_port)
 
             try:
+                # Bind the socket to the local address
+                sock.bind(local_address)
+
                 # Connect to the server
                 sock.connect(server_address)
 
                 # Send the message
                 sock.sendall(msg.encode())
-                print(f"TCP message sent to {ip}:{port}")
+                Outter.out("sec", f"TCP message sent to {ip}:{port}")
             finally:
                 sock.close()
 
-        def wait(ip: str, port: int):
+        def wait(port: int, ip="0.0.0.0"):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = (ip, port)
+            data = None
 
             try:
                 # Bind the socket to the server address
@@ -46,21 +53,36 @@ class ExternalConnections:
 
                 # Listen for incoming connections
                 sock.listen(1)
-                print(f"TCP server listening on {ip}:{port}")
+                Outter.out("sec", f"TCP server listening on {ip}:{port}")
 
                 while True:
                     # Accept incoming connection
                     connection, client_address = sock.accept()
-                    print(f"Incoming connection from {client_address[0]}:{client_address[1]}")
+                    Outter.out("sec", f"Incoming connection from {client_address[0]}:{client_address[1]}")
 
                     # Receive and process the message
                     data = connection.recv(1024).decode()
-                    print(f"Received message: {data}")
+                    Outter.out("sec", f"Received message: {data}")
 
                     # Close the connection
                     connection.close()
-                    print("Connection closed.")
-                    
+                    Outter.out("sec", "Connection closed.")
+
             finally:
                 sock.close()
-                print("Stopped")
+                Outter.out("sec", "Stopped")
+                return data
+            
+        class ChitChat:
+            def receiver(port: int):
+                print("Starting rec tread")
+                while True:
+                    response = ExternalConnections.TCP.wait(port)
+                    Outter.out("pri", response)
+            
+            def startChitChat(ip: str, port: int, local_port: int):
+                rec = threading.Thread(target=ExternalConnections.TCP.ChitChat.receiver, args=(port,))
+                rec.start()
+                while True:
+                    msg = input(">>")
+                    ExternalConnections.TCP.send(ip, port, msg, local_port)
