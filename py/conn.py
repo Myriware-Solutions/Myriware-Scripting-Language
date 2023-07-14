@@ -1,6 +1,8 @@
 import socket
 import threading
 from outter import Outter
+from conn_back import ExternBackgroundWorker
+import _shared
 
 # class ExternalConnections:
 #     # Class USP: wiki.python.org/moin/UdpCommunication
@@ -73,16 +75,15 @@ class ExternalConnections:
                 Outter.out("sec", "Stopped")
                 return data
             
-        class ChitChat:
-            def receiver(port: int):
-                print("Starting rec tread")
-                while True:
-                    response = ExternalConnections.TCP.wait(port)
-                    Outter.out("pri", response)
-            
-            def startChitChat(ip: str, port: int, local_port: int):
-                rec = threading.Thread(target=ExternalConnections.TCP.ChitChat.receiver, args=(port,))
-                rec.start()
-                while True:
-                    msg = input(">>")
-                    ExternalConnections.TCP.send(ip, port, msg, local_port)
+    class ChitChat:
+        
+        def startChitChat(ip: str, port: int, local_port: int):
+            listening_thread = ExternBackgroundWorker(port)
+            _shared.ExternThread = listening_thread
+            listening_thread.start()
+            while True:
+                msg = input(">>")
+                if msg == "__END__":
+                    _shared.ExternThread.stop_thread()
+                    break
+                ExternalConnections.TCP.send(ip, port, msg, local_port)
