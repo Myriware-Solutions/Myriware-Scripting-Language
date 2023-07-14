@@ -79,7 +79,7 @@ class ExternalConnections:
             
     class ChitChat:
         
-        def startChitChat(ip: str, port: int, local_port: int):
+        def startChitChat(ip: str, port: int):
             listening_thread = ExternBackgroundWorker(port)
             _shared.ExternThread = listening_thread
             listening_thread.start()
@@ -88,4 +88,4 @@ class ExternalConnections:
                 if msg == "__END__":
                     _shared.ExternThread.stop_thread()
                     break
-                ExternalConnections.TCP.send(ip, port, msg, local_port)
+                ExternalConnections.TCP.send(ip, port, msg)
