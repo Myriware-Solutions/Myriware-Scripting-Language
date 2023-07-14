@@ -76,8 +76,8 @@ def runline(cmd):
                 cmd_info = re.search(r".*:([0-9.]+) ([0-9]+)", cmd)
                 ExternalConnections.TCP.wait(cmd_info.group(1), int(cmd_info.group(2)))
       case "Chatter":
-        port_ip = re.search(r"([0-9.a-z]+) ([0-9]+) ([0-9]+)", cmdData)
-        ExternalConnections.ChitChat.startChitChat(port_ip.group(1), int(port_ip.group(2)), int(port_ip.group(3)))
+        port_ip = re.search(r"([0-9.a-z]+) ([0-9]+)", cmdData)
+        ExternalConnections.ChitChat.startChitChat(port_ip.group(1), int(port_ip.group(2)))
 
     # Other language type functions (static names)
       case "for":

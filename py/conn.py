@@ -26,14 +26,16 @@ import _shared
 
 class ExternalConnections:
     class TCP:
-        def send(ip: str, port: int, msg: str, local_port: int):
+        def send(ip: str, port: int, msg: str, 
+                 #local_port: int
+                 ):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = (ip, port)
-            local_address = ('', local_port)
+            # local_address = ('', local_port)
 
             try:
                 # Bind the socket to the local address
-                sock.bind(local_address)
+                # sock.bind(local_address)
 
                 # Connect to the server
                 sock.connect(server_address)
