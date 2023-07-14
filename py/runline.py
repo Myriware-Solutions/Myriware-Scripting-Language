@@ -65,16 +65,16 @@ def runline(cmd):
         sub = re.search(r"(.*):", cmd).group(1).split(' ')
         print("Extern (loading...)")
         match sub[1]:
-          case "udp":
+          case "tcp":
             match sub[2]:
-              case lang_opts.conn.udp.send:
+              case lang_opts.conn.tcp.send:
                 print("doing stuff")
                 cmd_info = re.search(r".*:([0-9.]+) ([0-9]+) (.*)$", cmd)
-                ExternalConnections.UDP.send(cmd_info.group(1), int(cmd_info.group(2)), Typer.parse(cmd_info.group(3))["value"])
-              case lang_opts.conn.udp.wait:
+                ExternalConnections.TCP.send(cmd_info.group(1), int(cmd_info.group(2)), Typer.parse(cmd_info.group(3))["value"])
+              case lang_opts.conn.tcp.wait:
                 print("doing stuff too")
                 cmd_info = re.search(r".*:([0-9.]+) ([0-9]+)", cmd)
-                ExternalConnections.UDP.wait(cmd_info.group(1), int(cmd_info.group(2)))
+                ExternalConnections.TCP.wait(cmd_info.group(1), int(cmd_info.group(2)))
 
     # Other language type functions (static names)
       case "for":

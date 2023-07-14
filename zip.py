@@ -13,6 +13,6 @@ def set():
     print("Done. Running Setup...")
     os.system("python setup.py")
 
-#set()
+set()
 os.system("python msl.zip console")
 
