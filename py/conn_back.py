@@ -3,11 +3,10 @@ import threading
 from outter import Outter
 
 class ExternBackgroundWorker(threading.Thread):
-    def __init__(self, localport, logfile):
+    def __init__(self, localport):
         super().__init__()
         self._stop_event = threading.Event()
         self.local_port = localport
-        self.log_file = logfile
 
     def run(self):
         while not self._stop_event.is_set():
