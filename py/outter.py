@@ -38,5 +38,5 @@ class Outter:
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     file = open(location, "a")
-    file.write(f"{dt_string}: {text}")
+    file.write(f"{dt_string}: {text}\n")
     file.close()

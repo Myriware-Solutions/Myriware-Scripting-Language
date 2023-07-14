@@ -12,7 +12,7 @@ class ExternBackgroundWorker(threading.Thread):
         while not self._stop_event.is_set():
 
             # Add your continuous thread logic here
-            print("Thread is running...")
+            Outter.file("netlog", "Thread is running")
 
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = ("0.0.0.0", self.local_port)
