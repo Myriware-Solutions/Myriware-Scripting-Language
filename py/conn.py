@@ -42,7 +42,7 @@ class ExternalConnections:
 
                 # Send the message
                 sock.sendall(msg.encode())
-                Outter.out("sec", f"TCP message sent to {ip}:{port}")
+                Outter.out("net", f"TCP message sent to {ip}:{port}")
             finally:
                 sock.close()
 
