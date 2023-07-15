@@ -79,6 +79,7 @@ def runline(cmd):
         port_ip = re.search(r"([0-9.a-z]+) ([0-9]+)", cmdData)
         ExternalConnections.ChitChat.startChitChat(port_ip.group(1), int(port_ip.group(2)))
 
+
     # Other language type functions (static names)
       case "for":
         # SYNTAX    for <#_num_|[_array_]|$_function_>::<cmd>

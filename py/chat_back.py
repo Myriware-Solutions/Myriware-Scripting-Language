@@ -1,20 +1,18 @@
 import socket
 import threading
 from outter import Outter
-from runline import runline
 
-class CustomBackgroundWorker(threading.Thread):
-    def __init__(self, localport, command):
+class ExternBackgroundWorker(threading.Thread):
+    def __init__(self, localport):
         super().__init__()
         self._stop_event = threading.Event()
         self.local_port = localport
-        self.command = command
 
     def run(self):
         while not self._stop_event.is_set():
 
             # Add your continuous thread logic here
-            Outter.out("net", "Thread is running")
+            Outter.file("netlog", "Thread is running")
 
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = ("0.0.0.0", self.local_port)
@@ -26,26 +24,27 @@ class CustomBackgroundWorker(threading.Thread):
 
                 # Listen for incoming connections
                 sock.listen(1)
-                Outter.out("net", f"TCP server listening on 0.0.0.0:{self.local_port}")
+                Outter.file("netlog", f"TCP server listening on 0.0.0.0:{self.local_port}")
 
                 while True:
                     # Accept incoming connection
                     connection, client_address = sock.accept()
-                    Outter.out("net", f"Incoming connection from {client_address[0]}:{client_address[1]}")
+                    Outter.file("netlog", f"Incoming connection from {client_address[0]}:{client_address[1]}")
 
                     # Receive and process the message
                     data = connection.recv(1024).decode()
-                    Outter.out("net", f"Received message: {data}")
+                    Outter.file("netlog", f"Received message: {data}")
+
+                    # Send the mesage to the user
+                    Outter.out("pri", f"{client_address[0]}: {data}")
 
                     # Close the connection
                     connection.close()
-                    Outter.out("net", "Connection closed.")
-
-                    runline(self.command.replace('$WORKER_OUT', data))
+                    Outter.file("netlog", "Connection closed.")
 
             finally:
                 sock.close()
-                Outter.out("net", "Stopped")
+                Outter.file("netlog", "Stopped")
                 
     def stop_thread(self):
         self._stop_event.set()
