@@ -85,7 +85,7 @@ class ExternalConnections:
             _shared.ExternThread = listening_thread
             listening_thread.start()
             while True:
-                msg = input(">>")
+                msg = input()
                 if msg == "__END__":
                     _shared.ExternThread.stop_thread()
                     break
