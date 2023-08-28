@@ -2,7 +2,7 @@
 Welcome to MSL, a unique kind of interface. MSL is a bit of its own programming language--complete with a unique syntax, commands, etc.--, however it still relies on another programming lanuage to run.
 ## Syntax
 MSL follows this kinds of syntax:
-  * <cmd> <cmd_specs ...>:<input>
+  * \<cmd> \<cmd_specs ...>:\<input>
  
 where
   * cmd = command or module
