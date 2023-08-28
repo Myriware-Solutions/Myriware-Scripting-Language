@@ -10,9 +10,9 @@ where
   * input = info to pass onto the command
 
 examples
-  * echo:"Hello" # prints "Hello"
-  * make variable:"Hello World!" # makes a var with name "variable" and value "Hello World!"
-  * Extern send:10.0.0.0 200 @variable # sends a tcp message to 10.0.0.0 on port 200 with message "Hello World!"
+  * <code>echo:"Hello" # prints "Hello"</code>
+  * <code>make variable:"Hello World!"</code> makes a var with name "variable" and value "Hello World!"
+  * <code>Extern send:10.0.0.0 200 @variable</code> sends a tcp message to 10.0.0.0 on port 200 with message "Hello World!"
 
 ### Data Types
 There are a few types of data types in MSL. Each is specified by a different identifier.
