@@ -13,4 +13,28 @@ examples
   * echo:"Hello" # prints "Hello"
   * make variable:"Hello World!" # makes a var with name "variable" and value "Hello World!"
   * Extern send:10.0.0.0 200 @variable # sends a tcp message to 10.0.0.0 on port 200 with message "Hello World!"
-##
+
+### Data Types
+There are a few types of data types in MSL. Each is specified by a different identifier.
+
+#### String
+<code>"string"</code>
+
+This is the most basic string. It stores chars in a normal string type. Specified by double qoutes.
+
+#### String (Composite)
+<code>\`composite {@string}\`</code>
+
+These string as like regular except that they use backticks [`].
+
+## Commands
+
+### Variables
+
+#### Make
+
+<code>make {name}: {info}</code>
+* name = variable name
+* info = data-input (see data types)
+
+This function is your basic assign variable info function.
