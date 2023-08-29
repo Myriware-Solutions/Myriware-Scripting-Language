@@ -12,11 +12,14 @@ class Imports:
         match package_module[0]:
             case "lang":
                 type = "lang"
-                destination = "./lang/"
+                destination = "./msl/lang/"
             case "module":
                 type = "py"
-                destination = "../imp/"
+                destination = "./msl/imports/"
         file_name = f"{package_module[1]}.{type}"
         url = f"{github_url}/{package_module[0]}/{file_name}"
         Outter.out('sec', "Requesting URL: " + url)
         urllib.request.urlretrieve(url, destination + file_name)
+
+    def run(module: str, function: str):
+        print("jj")

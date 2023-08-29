@@ -33,6 +33,7 @@ except:
 config = f"""pri = true
 sec = true
 err = true
+net = true
 lang = "{lang}"
 """
 print("Writting...")

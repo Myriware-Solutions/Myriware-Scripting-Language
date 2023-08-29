@@ -1,4 +1,5 @@
 import tomllib
+from datetime import datetime
 from runtime import Runtime
 
 Config = Runtime.loadConfig()
@@ -30,3 +31,12 @@ class Outter:
           print(msg)
         case "sec":
           print(f"{Dark_Gray}{msg}{Color_Off}")
+        case "net":
+          print(f"{Dark_Gray}{msg}{Color_Off}")
+  
+  def file(location: str, text: str):
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    file = open(location, "a")
+    file.write(f"{dt_string}: {text}\n")
+    file.close()

@@ -5,11 +5,11 @@ from runline import runline
 
 def RunFile(fileToRun: str):
     #output and variable files
-    f = open("../gen/runtime.json", "w")
+    f = open("./runtime.json", "w")
     f.write('{}')
     f.close()
     #setup the output file
-    f = open("../gen/output.json", "w")
+    f = open("./output.json", "w")
     f.write('[]')
     f.close()
     #other files

@@ -1,7 +1,7 @@
 import socket
 import threading
 from outter import Outter
-from conn_back import ExternBackgroundWorker
+from chat_back import ExternBackgroundWorker
 import _shared
 
 # class ExternalConnections:
@@ -42,7 +42,7 @@ class ExternalConnections:
 
                 # Send the message
                 sock.sendall(msg.encode())
-                Outter.out("sec", f"TCP message sent to {ip}:{port}")
+                Outter.out("net", f"TCP message sent to {ip}:{port}")
             finally:
                 sock.close()
 
@@ -84,8 +84,17 @@ class ExternalConnections:
             _shared.ExternThread = listening_thread
             listening_thread.start()
             while True:
-                msg = input(">>")
+                msg = input()
                 if msg == "__END__":
                     _shared.ExternThread.stop_thread()
                     break
                 ExternalConnections.TCP.send(ip, port, msg)
+
+    class Customs:
+        
+        #def make(port: int, cmd: str, name: str):
+            #_shared.CustomBackgroundWorkers[name] = CustomBackgroundWorker(port, cmd)
+            #_shared.CustomBackgroundWorkers[name].start()
+
+        def stop(name):
+            _shared.CustomBackgroundWorkers[name].stop_thread()

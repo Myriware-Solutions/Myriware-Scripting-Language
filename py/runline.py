@@ -1,8 +1,10 @@
+import inspect
 import os
 import re
 import sys
 import json
 import traceback
+import importlib.util
 #other files
 from runtime import Runtime
 from outter import Outter
@@ -15,7 +17,7 @@ def runline(cmd):
   try:
     if (cmd == ""):
       return None
-    cmdType = (re.search(r"^\w+(?=[<\s:])", cmd)).group()
+    cmdType = (re.search(r"^[\w*]+(?=[<\s:])", cmd)).group()
     cmdData = (re.search(r".*?:(.*)", cmd)).group(1)
     lang_opts = (Runtime.lo()).runline.input
     match cmdType:
@@ -59,6 +61,34 @@ def runline(cmd):
           case "get":
             # Get an module/lang
             Imports.get(Typer.parse(cmdData)['value'])
+      case "*":
+        # Run a Modules function
+        ps = re.search(r"\* ([a-zA-z]*) ([a-zA-z]*):(.*)", cmd)
+        module_name  = ps.group(1)
+        module_path  = f"./msl/imports/{module_name}.py"
+
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        test_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(test_module)
+
+        function_name = ps.group(2)
+
+        # Check if the function exists in the module
+        if hasattr(test_module, function_name) and callable(getattr(test_module, function_name)):
+            # Get the function using getattr and call it
+            func = getattr(test_module, function_name)
+            # Get the function's signature
+            signature = inspect.signature(func)
+
+            # Count the number of parameters
+            num_parameters = len(signature.parameters)
+            if num_parameters == 0:
+              func()
+            elif num_parameters == 1:
+              function_paramas = Typer.parse(ps.group(3))["value"]
+              func(function_paramas)
+        else:
+            print(f"The function '{function_name}' does not exist or is not callable.")
 
     # External Connection based commands
       case lang_opts.conn_name:
@@ -78,6 +108,7 @@ def runline(cmd):
       case "Chatter":
         port_ip = re.search(r"([0-9.a-z]+) ([0-9]+)", cmdData)
         ExternalConnections.ChitChat.startChitChat(port_ip.group(1), int(port_ip.group(2)))
+
 
     # Other language type functions (static names)
       case "for":

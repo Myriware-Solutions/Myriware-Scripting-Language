@@ -12,7 +12,7 @@ class ExternBackgroundWorker(threading.Thread):
         while not self._stop_event.is_set():
 
             # Add your continuous thread logic here
-            print("Thread is running...")
+            Outter.file("netlog", "Thread is running")
 
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_address = ("0.0.0.0", self.local_port)
@@ -24,30 +24,27 @@ class ExternBackgroundWorker(threading.Thread):
 
                 # Listen for incoming connections
                 sock.listen(1)
-                Outter.out("sec", f"TCP server listening on 0.0.0.0:{self.local_port}")
+                Outter.file("netlog", f"TCP server listening on 0.0.0.0:{self.local_port}")
 
                 while True:
                     # Accept incoming connection
                     connection, client_address = sock.accept()
-                    Outter.out("sec", f"Incoming connection from {client_address[0]}:{client_address[1]}")
+                    Outter.file("netlog", f"Incoming connection from {client_address[0]}:{client_address[1]}")
 
                     # Receive and process the message
                     data = connection.recv(1024).decode()
-                    Outter.out("sec", f"Received message: {data}")
+                    Outter.file("netlog", f"Received message: {data}")
 
                     # Send the mesage to the user
                     Outter.out("pri", f"{client_address[0]}: {data}")
 
                     # Close the connection
                     connection.close()
-                    Outter.out("sec", "Connection closed.")
+                    Outter.file("netlog", "Connection closed.")
 
             finally:
                 sock.close()
-                Outter.out("sec", "Stopped")
-
-
-
-
+                Outter.file("netlog", "Stopped")
+                
     def stop_thread(self):
         self._stop_event.set()
