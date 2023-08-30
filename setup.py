@@ -31,10 +31,11 @@ try:
 except:
     lang = "en"
 config = f"""pri = true
-sec = true
+sec = false
 err = true
 net = true
 lang = "{lang}"
+tips = true
 """
 print("Writting...")
 config_file.write(config)

@@ -3,8 +3,8 @@ import sys
 from console import RunConsole
 from runfile import RunFile
 
-print("msl...")
-print(sys.argv)
+#print("msl...")
+#print(sys.argv)
 try:
   match sys.argv[1]:
     case "console":

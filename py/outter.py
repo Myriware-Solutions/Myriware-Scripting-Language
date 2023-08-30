@@ -1,8 +1,7 @@
-import tomllib
 from datetime import datetime
-from runtime import Runtime
+from lango import loadConfig
 
-Config = Runtime.loadConfig()
+Config = loadConfig()
 
 # Reset
 Color_Off='\033[0m'       # Text Reset

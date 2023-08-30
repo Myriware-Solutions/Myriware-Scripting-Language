@@ -1,5 +1,31 @@
 import re
 import json
+import tomllib
+
+def loadConfig():
+    f = open("./msl/config.toml", "r")
+    c = f.read()
+    data = tomllib.loads(c)
+    f.close()
+    return data
+  
+def l():
+    f = open("./msl/config.toml", "r")
+    c = f.read()
+    data = tomllib.loads(c)
+    f.close()
+    return Lango.loadConfigFile(f"./msl/lang/{data['lang']}.lang", "./msl/lang/_msl.sch")
+
+def lo():
+    class DictToObject:
+        def __init__(self, dictionary):
+            for key, value in dictionary.items():
+                if isinstance(value, dict):
+                    setattr(self, key, DictToObject(value))
+                else:
+                    setattr(self, key, value)
+    #print(l())
+    return DictToObject(l())
 
 # hashtag I love ChatGPT
 def generate_nested_dict_from_string(string, values):
