@@ -1,22 +1,19 @@
+import random
 from runline import runline
-from runtime import Runtime
-import tomllib
-import os
+from lango import lo
+from z_tips import Tips
+Lang = lo()
 
 def RunConsole():
-  #output and variable files
-  f = open("./msl/gen/runtime.json", "w")
-  f.write('{}')
-  f.close()
-  #setup the output file
-  f = open("./msl/gen/output.json", "w")
-  f.write('[]')
-  f.close()
-
-  print(Runtime.l()['console']['output']['opening'])
+  #print(Runtime.l()['console']['output']['opening'])
+  print(Lang.console.output.opening)
+  random_index = random.randint(0, len(Tips) - 1)
+  random_tip = Tips[random_index]
+  print("    " + random_tip)
   while True:
     inpu = input("> ")
-    if inpu == Runtime.l()['console']['input']['stop']:
+    #if inpu == Runtime.l()['console']['input']['stop']:
+    if inpu == Lang.console.input.stop:
       break
     else:
       runline(inpu)

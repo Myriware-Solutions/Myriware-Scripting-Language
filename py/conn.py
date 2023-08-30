@@ -2,7 +2,7 @@ import socket
 import threading
 from outter import Outter
 from chat_back import ExternBackgroundWorker
-import _shared
+import _runtime
 
 # class ExternalConnections:
 #     # Class USP: wiki.python.org/moin/UdpCommunication
@@ -81,12 +81,12 @@ class ExternalConnections:
         
         def startChitChat(ip: str, port: int):
             listening_thread = ExternBackgroundWorker(port)
-            _shared.ExternThread = listening_thread
+            _runtime.ExternThread = listening_thread
             listening_thread.start()
             while True:
                 msg = input()
                 if msg == "__END__":
-                    _shared.ExternThread.stop_thread()
+                    _runtime.ExternThread.stop_thread()
                     break
                 ExternalConnections.TCP.send(ip, port, msg)
 
@@ -97,4 +97,4 @@ class ExternalConnections:
             #_shared.CustomBackgroundWorkers[name].start()
 
         def stop(name):
-            _shared.CustomBackgroundWorkers[name].stop_thread()
+            _runtime.CustomBackgroundWorkers[name].stop_thread()
