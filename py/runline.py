@@ -7,8 +7,8 @@ import traceback
 import importlib.util
 #other files
 from outter import Outter
-from tasp import TaspParse
 from typer import Tipe
+from typer import Tasp
 from imports import Imports
 from conn import ExternalConnections
 from lango import lo
@@ -37,7 +37,7 @@ def runline(cmd):
         Outter.out('pri', f"<{val.type}> {val.value}")
       case Lang.runline.input.echo:
         # Prints out the value of the input
-        Outter.out('pri', Tipe(cmdData).value)
+        Outter.out('pri', Tipe(cmdData))
       case Lang.runline.input.vardump:
         # Prints out all the contents of the Runtime
         vars = Runtime.keys()
@@ -130,12 +130,26 @@ def runline(cmd):
             # The hashtag will do the following command x times (the number proceeding the #). Also, it will replace the $FOR_INT with it's current number
             for x in range(0, int(args.group(1)[1:])):
               runline(args.group(2).replace("$FOR_INT", str(x)))
+          case "@":
+            # This refferances a variable
+            var = Tipe(args.group(1))
+            match var.type:
+              case "Array":
+                # replaces the $FOR_VAL with the value of theat index
+                for item in var.value:
+                  runline(args.group(2).replace("$FOR_VAL", item.value))
 
     # humorous
-      case Lang.runline.input.tipme:
+      case "tipme":
         random_index = random.randint(0, len(Tips) - 1)
         random_tip = Tips[random_index]
         print("    " + random_tip)
+
+    # variable representation
+      case "mkreadable":
+        table = Tipe(cmdData).value
+        asStr = table.makeReadable()
+        Outter.out("pri", asStr)
 
 
     # No command found
