@@ -5,6 +5,7 @@ import random
 import re
 import traceback
 import importlib.util
+import tomllib
 #other files
 from outter import Outter
 from typer import Tipe
@@ -12,11 +13,23 @@ from typer import Tasp
 from imports import Imports
 from conn import ExternalConnections
 from lango import lo
+from lango import loadConfig
 from _runtime import Runtime
 from z_tips import Tips
 #langpack
 Lang = lo()
 #print("Loaded LangPack:", Lang)
+def dict_to_toml(d):
+    toml_lines = []
+    for key, value in d.items():
+        if isinstance(value, str):
+            toml_lines.append(f'{key} = "{value}"')
+        elif isinstance(value, int):
+            toml_lines.append(f'{key} = {value}')
+        elif isinstance(value, bool):
+            toml_lines.append(f'{key} = {str(value).lower()}')
+    toml_string = "\n".join(toml_lines)
+    return toml_string.lower()
 #code
 def runline(cmd):
   try:
@@ -55,8 +68,32 @@ def runline(cmd):
         # Destroys a variable
         varName = re.findall(r"^\w+(?=[<\s]).* (\w*):", cmd)[0]
         del Runtime[varName]
+      case "defclass":
+        # Create a caste for a custom class
+        class_name = re.findall(r"^\w+(?=[<\s]).* (\w*):", cmd)[0]
+        class_attr_strs = cmdData.replace(' ','').split(',')
+        temp = { }
+        for class_attr in class_attr_strs:
+          parts = re.search(r'([\w]*)=([\w]*)', class_attr)
+          temp[parts.group(1)] = parts.group(2)
+        #add it to classes file
+        classes_file = open("./msl/classes.json", 'r')
+        pre_ex_dt = json.loads(classes_file.read())
+        pre_ex_dt[class_name] = temp
+        classes_file.close()
+        classes_file = open("./msl/classes.json", 'w')
+        classes_file.write(json.dumps(pre_ex_dt))
+        classes_file.close()
 
     # MSL based commands
+      case "config":
+        arg_stri = cmdData.replace(' ',''); args = arg_stri.split(',')
+        key_name = Tipe(args[0]).value; key_value = Tipe(args[1]).value
+        pre_config = loadConfig()
+        pre_config[key_name] = key_value
+        config_f = open("msl/config.toml", 'w')
+        config_f.write(dict_to_toml(pre_config))
+        config_f.close()
       case Lang.runline.input.execute:
         # Run a MSL file
         file_to = Tipe(cmd.split(":")[1]).value
@@ -158,6 +195,9 @@ def runline(cmd):
   except Exception as e:
     # stackoverflow.com/questions/1483429/how-do-i-print-an-exception-in-python
     # stackoverflow.com/questions/1278705/when-i-catch-an-exception-how-do-i-get-the-type-file-and-line-number
-    Outter.out("err", f"  There's an error here\n  Type: {type(e).__name__}\n  File:  {__file__}\n  Line:  {e.__traceback__.tb_lineno}")
+    # Outter.out("err", f"  There's an error here\n  Type: {type(e).__name__}\n  File:  {__file__}\n  Line:  {e.__traceback__.tb_lineno}")
     # Use for really, really bad problems
     traceback.print_exc()
+    Outter.out('err', "Error processing input.")
+    return False
+  return True

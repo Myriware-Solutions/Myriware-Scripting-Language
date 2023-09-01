@@ -18,6 +18,11 @@ os.mkdir("msl/gen/")
 os.mkdir("msl/imports/")
 os.mkdir("msl/lang/")
 print("Done")
+# create classses file
+print("Settingup Classes File (classes.json)")
+classes_file = open('msl/classes.json', 'w')
+classes_file.write("{ }")
+classes_file.close()
 # create config file
 print("Settingup Configuration File (config.toml)")
 config_file = open("msl/config.toml", 'w')
