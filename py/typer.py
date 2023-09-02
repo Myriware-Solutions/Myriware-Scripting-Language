@@ -324,7 +324,7 @@ Table Info   : {parts.group(3)}
             running_info['AdvSettings']['UsesTaspC'] = True
             if sect_parts.group(2) == "Norm":
               Outter.out('sec', "  Using defualt delimator: |")
-              running_info['AdvSettings']['TaspCSep'] = '|'
+              running_info['AdvSettings']['TaspCSep'] = "\n"
             else:
               Outter.out('sec', f"  Using custom delimator: {sect_parts.group(2)}")
               running_info['AdvSettings']['TaspCSep'] = sect_parts.group(2)

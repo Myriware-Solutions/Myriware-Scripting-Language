@@ -31,10 +31,15 @@ def dict_to_toml(d):
     toml_string = "\n".join(toml_lines)
     return toml_string.lower()
 #code
-def runline(cmd):
+def runline(cmd:str):
   try:
     if (cmd == ""):
-      return None
+      return False
+    elif (cmd.find('&&') != -1 and cmd.find('::') == -1):
+      Outter.out('sec', 'Found multiple commands to run')
+      for sep_cmd in cmd.split('&&'):
+        runline(sep_cmd.strip())
+      return True
     cmdType = (re.search(r"^[\w*]+(?=[<\s:])", cmd)).group()
     cmdData = (re.search(r".*?:(.*)", cmd)).group(1)
     match cmdType:
@@ -175,6 +180,8 @@ def runline(cmd):
                 # replaces the $FOR_VAL with the value of theat index
                 for item in var.value:
                   runline(args.group(2).replace("$FOR_VAL", item.value))
+      case "if":
+        print()
 
     # humorous
       case "tipme":

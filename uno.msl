@@ -14,5 +14,4 @@ input Age: ;
 defclass Castro: Name=String, Age=Number;
 make User:*Castro(@Name, @Age);
 echo:`Hello {@User.Name}, age {@User.Age}!`;
-dump:@User;
 vardump:
