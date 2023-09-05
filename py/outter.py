@@ -29,7 +29,7 @@ class Outter:
         case "pri":
           print(msg)
         case "sec":
-          print(f"{Dark_Gray}{msg}{Color_Off}")
+          print(f"  {Dark_Gray}{msg}{Color_Off}")
         case "net":
           print(f"{Dark_Gray}{msg}{Color_Off}")
   

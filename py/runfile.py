@@ -21,5 +21,5 @@ def RunFile(fileToRun: str):
     for cmd in commandLines:
         res = runline(cmd)
         if not res:
-            Outter.out('err', f'Something is wrong on line {index}')
+            Outter.out('err', f'Something is wrong on line {index}\n    {cmd}')
         index = index + 1

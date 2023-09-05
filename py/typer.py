@@ -27,18 +27,21 @@ class Tipe:
     base = _Typer.parse(value)
     self.value = base['f_value']
     self.type  = base['f_type']
+    Outter.out('sec', f"  Tipe variable made! {self.type}: {self}")
 
-  def __str__(self):
-    if self.type == "Array":
-      returnable = [ ]
-      for item in self.value:
-        #returnable.append(f"<{item.type}> {item.value}")
-        returnable.append(item.value)
-      return str(returnable)
-    else:
-      #return f"<{self.type}> {self.value}"
-      return str(self.value)
-
+  def __str__(self) -> str:
+    match self.type:
+      case 'Array':
+        returnable = [ ]
+        for item in self.value:
+          #returnable.append(f"<{item.type}> {item.value}")
+          returnable.append(item.value)
+        return str(returnable)
+      case 'Table':
+        return self.value.makeReadable("  ")
+      case _:
+        return str(self.value)
+    
 
 class _Typer:
   # Main function, string = string that needs parsed, ideally from input
@@ -245,16 +248,16 @@ class Tasp:
     self.meta = placeholder['meta']
     self.name = placeholder['name']
 
-  def makeReadable(self):
-    statement = f"Reading {self.name} (meta name)"
+  def makeReadable(self, prefix=""):
+    statement = f"{prefix}Reading {self.name} (meta name)"
     running_info = self.meta
     if running_info['Ac_Cols'] and running_info['Ac_Rows']:
       Outter.out("sec", "WIP")
     elif running_info['Ac_Cols']:
       for column in self.meta['Cols']:
-        statement = f"{statement}\n{column}"
+        statement = f"{statement}\n{prefix}{column}"
         for row in self.table[column]:
-          statement = f"{statement}\n  {row}"
+          statement = f"{statement}\n  {prefix}{row}"
     elif running_info['Ac_Rows']:
       Outter.out("sec", "WIP")
     return statement
