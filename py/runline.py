@@ -5,23 +5,41 @@ import random
 import re
 import traceback
 import importlib.util
+import tomllib
 #other files
 from outter import Outter
-from tasp import TaspParse
 from typer import Tipe
+from typer import Tasp
 from imports import Imports
 from conn import ExternalConnections
 from lango import lo
+from lango import loadConfig
 from _runtime import Runtime
 from z_tips import Tips
 #langpack
 Lang = lo()
 #print("Loaded LangPack:", Lang)
+def dict_to_toml(d):
+    toml_lines = []
+    for key, value in d.items():
+        if isinstance(value, str):
+            toml_lines.append(f'{key} = "{value}"')
+        elif isinstance(value, int):
+            toml_lines.append(f'{key} = {value}')
+        elif isinstance(value, bool):
+            toml_lines.append(f'{key} = {str(value).lower()}')
+    toml_string = "\n".join(toml_lines)
+    return toml_string.lower()
 #code
-def runline(cmd):
+def runline(cmd:str):
   try:
     if (cmd == ""):
-      return None
+      return False
+    elif (cmd.find('&&') != -1 and cmd.find('::') == -1):
+      Outter.out('sec', 'Found multiple commands to run')
+      for sep_cmd in cmd.split('&&'):
+        runline(sep_cmd.strip())
+      return True
     cmdType = (re.search(r"^[\w*]+(?=[<\s:])", cmd)).group()
     cmdData = (re.search(r".*?:(.*)", cmd)).group(1)
     match cmdType:
@@ -37,7 +55,7 @@ def runline(cmd):
         Outter.out('pri', f"<{val.type}> {val.value}")
       case Lang.runline.input.echo:
         # Prints out the value of the input
-        Outter.out('pri', Tipe(cmdData).value)
+        Outter.out('pri', Tipe(cmdData))
       case Lang.runline.input.vardump:
         # Prints out all the contents of the Runtime
         vars = Runtime.keys()
@@ -55,8 +73,32 @@ def runline(cmd):
         # Destroys a variable
         varName = re.findall(r"^\w+(?=[<\s]).* (\w*):", cmd)[0]
         del Runtime[varName]
+      case "defclass":
+        # Create a caste for a custom class
+        class_name = re.findall(r"^\w+(?=[<\s]).* (\w*):", cmd)[0]
+        class_attr_strs = cmdData.replace(' ','').split(',')
+        temp = { }
+        for class_attr in class_attr_strs:
+          parts = re.search(r'([\w]*)=([\w]*)', class_attr)
+          temp[parts.group(1)] = parts.group(2)
+        #add it to classes file
+        classes_file = open("./msl/classes.json", 'r')
+        pre_ex_dt = json.loads(classes_file.read())
+        pre_ex_dt[class_name] = temp
+        classes_file.close()
+        classes_file = open("./msl/classes.json", 'w')
+        classes_file.write(json.dumps(pre_ex_dt))
+        classes_file.close()
 
     # MSL based commands
+      case "config":
+        arg_stri = cmdData.replace(' ',''); args = arg_stri.split(',')
+        key_name = Tipe(args[0]).value; key_value = Tipe(args[1]).value
+        pre_config = loadConfig()
+        pre_config[key_name] = key_value
+        config_f = open("msl/config.toml", 'w')
+        config_f.write(dict_to_toml(pre_config))
+        config_f.close()
       case Lang.runline.input.execute:
         # Run a MSL file
         file_to = Tipe(cmd.split(":")[1]).value
@@ -130,12 +172,28 @@ def runline(cmd):
             # The hashtag will do the following command x times (the number proceeding the #). Also, it will replace the $FOR_INT with it's current number
             for x in range(0, int(args.group(1)[1:])):
               runline(args.group(2).replace("$FOR_INT", str(x)))
+          case "@":
+            # This refferances a variable
+            var = Tipe(args.group(1))
+            match var.type:
+              case "Array":
+                # replaces the $FOR_VAL with the value of theat index
+                for item in var.value:
+                  runline(args.group(2).replace("$FOR_VAL", item.value))
+      case "if":
+        print()
 
     # humorous
-      case Lang.runline.input.tipme:
+      case "tipme":
         random_index = random.randint(0, len(Tips) - 1)
         random_tip = Tips[random_index]
         print("    " + random_tip)
+
+    # variable representation
+      case "mkreadable":
+        table = Tipe(cmdData).value
+        asStr = table.makeReadable()
+        Outter.out("pri", asStr)
 
 
     # No command found
@@ -144,6 +202,9 @@ def runline(cmd):
   except Exception as e:
     # stackoverflow.com/questions/1483429/how-do-i-print-an-exception-in-python
     # stackoverflow.com/questions/1278705/when-i-catch-an-exception-how-do-i-get-the-type-file-and-line-number
-    Outter.out("err", f"  There's an error here\n  Type: {type(e).__name__}\n  File:  {__file__}\n  Line:  {e.__traceback__.tb_lineno}")
+    # Outter.out("err", f"  There's an error here\n  Type: {type(e).__name__}\n  File:  {__file__}\n  Line:  {e.__traceback__.tb_lineno}")
     # Use for really, really bad problems
     traceback.print_exc()
+    Outter.out('err', "Error processing input.")
+    return False
+  return True

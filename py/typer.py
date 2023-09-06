@@ -1,5 +1,7 @@
 import json
+import os
 import re
+import traceback
 from outter  import Outter
 from _runtime import Runtime
 
@@ -25,7 +27,21 @@ class Tipe:
     base = _Typer.parse(value)
     self.value = base['f_value']
     self.type  = base['f_type']
+    Outter.out('sec', f"  Tipe variable made! {self.type}: {self}")
 
+  def __str__(self) -> str:
+    match self.type:
+      case 'Array':
+        returnable = [ ]
+        for item in self.value:
+          #returnable.append(f"<{item.type}> {item.value}")
+          returnable.append(item.value)
+        return str(returnable)
+      case 'Table':
+        return self.value.makeReadable("  ")
+      case _:
+        return str(self.value)
+    
 
 class _Typer:
   # Main function, string = string that needs parsed, ideally from input
@@ -50,14 +66,25 @@ class _Typer:
 #TODO: find the type?
         variable_type = 'any'
         value = Runtime[var_name].value[index]
+      # custom class <cClass>
+      if Runtime[var_name].type[0] == 'c' and string.find('.') != -1:
+        attr = re.search(r'\.([\w]*)', string)
+        classes_file = open("./msl/classes.json", 'r')
+        pre_ex_dt:dict = json.loads(classes_file.read())
+        classes_file.close()
+        value = Runtime[var_name].value[attr.group(1)]
+        var_t = Runtime[var_name].type[1:]
+        variable_type = pre_ex_dt[var_t][attr.group(1)]
       else:
         variable_type = Runtime[var_name].type
         value = Runtime[var_name].value
   # String
-    elif (string[0] == "\"" and string[len(string) - 1] == "\""):
+    elif ((string[0] == '"' and string[len(string) - 1] == '"') or
+          (string[0] == "'" and string[len(string) - 1] == "'")):
       variable_type = 'String'
       value = re.sub(r"(?<!\\)\"", '', string)
       value = re.sub(r"\\\"", '"', value)
+      value = value.replace("'", '')
   # String with variables
     elif (string[0] == "`" and string[len(string) - 1] == "`"):
       variable_type = 'String'
@@ -80,14 +107,53 @@ class _Typer:
     elif (string[0] == "{" and string[len(string) - 1] == "}"):
       variable_type = "Object"
       value = json.loads(string)
+  # TableSpeak Object
+    elif (string[0] == "="):
+      variable_type = "Table"
+      value = Tasp(string)
   # Function
-#TODO: fix this mess
     elif (string[0] == "(" and string[len(string) - 1] == ")"):
       strip = string[1:]
       strip = strip[:-1]
       res = _Typer.FunctionParse(strip)
-      variable_type = res.type
-      value = res.value
+      variable_type = res['type']
+      value = res['value']
+  # Booleans
+    elif (string.lower() == "true" or string.lower() == "t"):
+      variable_type = 'Boolean'
+      value = True
+    elif (string.lower() == "false" or string.lower() == "f"):
+      variable_type = 'Boolean'
+      value = False
+  # Custom User Objects
+    elif (string[0] == "*"):
+      Outter.out('sec', "Trying to cast custom object")
+      parts = re.search(r'\*([\w]*)\(([\w\s"\',.@[\]]*)\)', string)
+      classes_file = open("./msl/classes.json", 'r')
+      pre_ex_dt:dict = json.loads(classes_file.read())
+      classes_file.close()
+      if parts.group(1) in pre_ex_dt.keys():
+        class_struct:dict = pre_ex_dt[parts.group(1)]
+        cls_keys:list = list(class_struct.keys())
+        params = parts.group(2).split(',')
+        if len(params) is not len(cls_keys):
+          Outter.out('err', f'  Incorrect amount of parameters (expected {len(cls_keys)}, got {len(params)})')
+          return False
+        return_class = { }
+        index = 0
+        for param in parts.group(2).split(','):
+          param = param.strip()
+          tipe:Tipe = Tipe(param)
+          if tipe.type != class_struct[cls_keys[index]]:
+            Outter.out('err', f'  Types mismatch. For {cls_keys[index]}, expected <{class_struct[cls_keys[index]]}>, got <{tipe.type}>')
+            return False
+          return_class[cls_keys[index]] = tipe.value
+          index = index + 1
+        variable_type = f'c{parts.group(1)}'
+        value = return_class
+      else:
+        Outter.out('err', f'  Could not find class "{parts.group(1)}"')
+        return False
   # Number
     elif (is_float(string)):
       variable_type = 'Number'
@@ -132,9 +198,20 @@ class _Typer:
       case "Json":
         match functTree[1]:
           case "parse":
-            stri = Tipe(functArguments[0].strip())['value']
+            stri = Tipe(functArguments[0].strip()).value
             Outter.out("sec", f"Trying to parse:{stri}")
             return {'type':'Object', 'value':json.loads(stri)}
+      case "Tasp":
+        match functTree[1]:
+          case "getCol":
+            table = Tipe(functArguments[0].strip()).value
+            col = table.getColumn(Tipe(functArguments[1].strip()).value)
+            return {'type':'Array','value':col}
+          case "load":
+            tasp_file = open(Tipe(functArguments[0].strip()).value,"r")
+            tasp_tab = Tasp(tasp_file.read())
+            tasp_file.close()
+            return {'type':'Table','value':tasp_tab}
 
     # Single functions
       case "typeOf":
@@ -144,7 +221,180 @@ class _Typer:
         return {"type": "Type", "value": fullObj.type}
       case "_":
         # DeBug function. Returns the input
-        return Tipe(functArguments[0].strip())
+        # return Tipe(functArguments[0].strip())
+        var = Tipe(functArguments[0].strip())
+        return {"type": var.type, "value": var.value}
       case _:
         Outter.out("err", f"Did not find a function or module for '{functArguments}'")
         return None
+
+### TASP ###
+
+# Example:
+#   <
+#     (Active=Columns), 
+#     (Columns=Name & Age & Gender)
+#   >
+#   "Anthony", 16, "Male" |
+#   "Billy", 15, "Male" |
+#   "Katty", 15, "Female"
+# ;
+# =Example:<(Active=Columns), (Columns=Name & Age & Gender)>"Anthony", 16, "Male" |"Billy", 15, "Male" |"Katty", 15, "Female";
+
+class Tasp:
+  def __init__(self, toParse:str) -> None:
+    placeholder = _TableSpeak.parse(toParse)
+    self.table = placeholder['data']
+    self.meta = placeholder['meta']
+    self.name = placeholder['name']
+
+  def makeReadable(self, prefix=""):
+    statement = f"{prefix}Reading {self.name} (meta name)"
+    running_info = self.meta
+    if running_info['Ac_Cols'] and running_info['Ac_Rows']:
+      Outter.out("sec", "WIP")
+    elif running_info['Ac_Cols']:
+      for column in self.meta['Cols']:
+        statement = f"{statement}\n{prefix}{column}"
+        for row in self.table[column]:
+          statement = f"{statement}\n  {prefix}{row}"
+    elif running_info['Ac_Rows']:
+      Outter.out("sec", "WIP")
+    return statement
+  
+  def getColumn(self, colName:str):
+    running_info = self.meta
+    if running_info['Ac_Cols'] and not running_info['Ac_Rows']:
+      return self.table[colName]
+    else:
+      Outter.out("err", "Wrong type of Table Object! (Contains rows)")
+    
+
+class _TableSpeak:
+  def parse(inputString:str) -> dict:
+    string = inputString.replace(" ",'').replace("\n",'')
+    Outter.out("sec", f"Parsing {string}")
+    parts = [ ]
+    try:
+      parts = re.search(r'(\w*):<([<>()&,=\w\s]*)>([0-9,"\w\s|\/.]*)', string)
+      parts_info = f"""
+Table Name   : {parts.group(1)}
+Table Header : {parts.group(2)}
+Table Info   : {parts.group(3)}
+    """
+      Outter.out("sec", parts_info)
+      running_info = {
+        "Ac_Cols": False,
+        "Ac_Rows": False,
+        "Cols": [ ],
+        "Rows": [ ],
+        "AdvSettings": {
+          "UsesTaspC": False,
+          "TaspCSep": None
+        }
+      }
+      for header_sect in parts.group(2).split(","):
+        Outter.out("sec", f"Header Sect: {header_sect}")
+        sect_parts = re.search(r"\(([\w]*)=([\w&\s]*)\)", header_sect)
+        match sect_parts.group(1):
+          case "Active":
+            Outter.out("sec", "  Checking Actives")
+            if sect_parts.group(2) == "Columns&Rows" or sect_parts.group(2) == "Rows&Columns":
+              running_info["Ac_Cols"] = True
+              running_info["Ac_Rows"] = True
+              Outter.out("sec", "  Both")
+            elif sect_parts.group(2) == "Columns":
+              running_info["Ac_Cols"] = True
+              Outter.out("sec", "  Cols")
+            elif sect_parts.group(2) == "Rows":
+              running_info["Ac_Rows"] = True
+              Outter.out("sec", "  Rows")
+              
+          case "Columns":
+            Outter.out("sec", "  Setting Columns")
+            cols = sect_parts.group(2).split('&')
+            Outter.out("sec", cols)
+            running_info["Cols"] = cols
+
+          case "Rows":
+            Outter.out("sec", "  Setting Rows")
+            rows = sect_parts.group(2).split('&')
+            Outter.out("sec", rows)
+            running_info["Rows"] = rows
+
+          case "TaspC":
+            Outter.out("sec", "  Using TaspC")
+            running_info['AdvSettings']['UsesTaspC'] = True
+            if sect_parts.group(2) == "Norm":
+              Outter.out('sec', "  Using defualt delimator: |")
+              running_info['AdvSettings']['TaspCSep'] = "\n"
+            else:
+              Outter.out('sec', f"  Using custom delimator: {sect_parts.group(2)}")
+              running_info['AdvSettings']['TaspCSep'] = sect_parts.group(2)
+      #here
+      #put them into rows
+      #parts.group(3)
+      temp_tab = [ ]
+      rows_through = None
+      if running_info['AdvSettings']['UsesTaspC'] is True:
+        taspC_file = open(Tipe(parts.group(3)).value, 'r')
+        taspC = taspC_file.read()
+        taspC_file.close()
+        rows_through = taspC.split(running_info['AdvSettings']['TaspCSep'])
+      else:
+        rows_through = parts.group(3).split('|')
+      
+      for row_info in rows_through:
+        temp_row = [ ]
+        Outter.out("sec", f"Parsing row: {row_info}")
+        for col_info in row_info.split(','):
+          Outter.out("sec", f"Adding col: {col_info}")
+          temp_row.append(col_info)
+        temp_tab.append(temp_row)
+      Outter.out("sec", temp_tab)
+
+      # Last
+      obj = { }
+      if running_info['Ac_Cols'] and running_info['Ac_Rows']:
+        Outter.out("sec", "")
+
+      elif running_info['Ac_Cols']:
+        for head in running_info['Cols']:
+          obj[head] = [ ]
+        Outter.out("sec", obj)
+        for row in temp_tab:
+          Outter.out("sec", f"Adding in info: {row}")
+          index = 0
+          for col in row:
+            Outter.out("sec", f"Adding {col} to {running_info['Cols'][index]}")
+            obj[running_info['Cols'][index]].append(Tipe(col))
+            index = index + 1
+#TO
+
+      elif running_info['Ac_Rows']:
+        for head in running_info['Rows']:
+          obj[head] = [ ]
+        Outter.out("sec", obj)
+        for col in temp_tab:
+          Outter.out("sec", f"Adding in info: {col}")
+          index = 0
+          for row in col:
+            Outter.out("sec", f"Adding {row} to {running_info['Rows'][index]}")
+            obj[running_info['Rows'][index]].append(Tipe(row))
+            index = index + 1
+
+      else:
+        Outter.out("sec", )
+
+      Outter.out("sec", obj)
+      return {
+        "data":obj,
+        "meta":running_info,
+        "name":parts.group(1)
+      }
+    
+    except Exception as e:
+      Outter.out("sec", "Failed")
+      Outter.out("err", f"  There's an error here\n  Type: {type(e).__name__}\n  File:  {__file__}\n  Line:  {e.__traceback__.tb_lineno}")
+      traceback.print_exc()
+      return False
