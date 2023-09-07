@@ -74,8 +74,8 @@ Removes a variable from the Runtime.
 # TableSpeak
 TableSpeak, or Tasp, is an effiecent way to store huge tables of data, and easily change the way that you viwe it. Let't take a large example:
 
-<code>
-Tasp: # Defines the meta-name of the table. This is used if multiple tables are used within the same file
+```
+=Tasp: # Defines the meta-name of the table. This is used if multiple tables are used within the same file
  <
   (Active=Columns), # Defines which way you are looking at the table
   (Columns=Name&Age) # Defines the Name of the rows
@@ -87,10 +87,10 @@ Tasp: # Defines the meta-name of the table. This is used if multiple tables are 
  "Jess",    17 |
  "Abidule", 18
 ;
-</code>
+```
 
 ## Meta-name
-The meta-name is the name of the table. This can be only word-characters (regex '\w'). When MSL parses Tasp, it stores the name in the Meta attribute of the object.
+The meta-name is the name of the table. This can be only word-characters (regex '\w'). When MSL parses Tasp, it stores the name in the Meta attribute of the object. There need to be an equals sign before the meta-name. This is because Tasp is MSL, meaning that like the string or object, it has a denoter.
 
 ## Header
 The table Header is all the stuff that falles <code>\< here ></code>. The data entries are in parentisis, and seperated by commas (<code>(...=...), (...=...)</code>). Inside, they contain the tag (left of the equals), and the data (right of the equals). The only accepted values are word-characters and the ampsterstand (&) for defining multiple things.
@@ -100,7 +100,7 @@ The Active tag conatins wich of the following ways the table will be looked at. 
 
 ```
 # Tasp
-Cols:<(Active=Columns),(Columns=Name&Age&Gender)>
+=Cols:<(Active=Columns),(Columns=Name&Age&Gender)>
 "Anthony", 16, 'm' |
 "John",    17, 'm' |
 "Jess",    17, 'f' ;
@@ -110,7 +110,7 @@ Cols:<(Active=Columns),(Columns=Name&Age&Gender)>
   "Age": [ 16, 17,  17 ],
   "Gender": [ "m", "m", "f" ] } */
 
-Rows:<(Active=Rows),(Columns=Anthony&John&Jess)>
+=Rows:<(Active=Rows),(Columns=Anthony&John&Jess)>
 16, 'm' |
 17, 'm' |
 17, 'f' ;
@@ -120,7 +120,7 @@ Rows:<(Active=Rows),(Columns=Anthony&John&Jess)>
   "John": [17, "m"],
   "Jess": [17, "f"] } */
 
-Both:<(Active=Columns&Rows),(Columns=Age&Gender),(Rows=Anthony&John&Jess)>
+=Both:<(Active=Columns&Rows),(Columns=Age&Gender),(Rows=Anthony&John&Jess)>
 16, 'm' |
 17, 'm' |
 17, 'f' ;
@@ -144,7 +144,7 @@ TaspC allowes for even better cross-communications. TaspC stores the header in o
 
 ```
 ex.tasp
-Cols:<(Active=Columns),(Columns=Name&Age),(TaspC=\n)>"./ex.csv";
+=Cols:<(Active=Columns),(Columns=Name&Age),(TaspC=\n)>"./ex.csv";
 
 ex.csv
  "Anthony", 16
