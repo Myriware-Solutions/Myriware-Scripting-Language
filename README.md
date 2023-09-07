@@ -72,7 +72,7 @@ This function is your basic assign variable info function.
 Removes a variable from the Runtime.
 
 # TableSpeak
-TableSpeak, or Tasp, is an effiecent way to store huge tables of data, and easily change the way that you viwe it. Let't take a large example:
+TableSpeak, or Tasp, is an effiecent way to store huge tables of data, and easily change the way that you view it. Let't take an example:
 
 ```
 =Tasp: # Defines the meta-name of the table. This is used if multiple tables are used within the same file
@@ -90,7 +90,7 @@ TableSpeak, or Tasp, is an effiecent way to store huge tables of data, and easil
 ```
 
 ## Meta-name
-The meta-name is the name of the table. This can be only word-characters (regex '\w'). When MSL parses Tasp, it stores the name in the Meta attribute of the object. There need to be an equals sign before the meta-name. This is because Tasp is MSL, meaning that like the string or object, it has a denoter.
+The meta-name is the name of the table. This can be only word-characters (regex '\w'). When MSL parses Tasp, it stores the name in the Meta attribute of the object. There needs to be an equals sign before the meta-name. This is because Tasp is MSL, meaning that like the string or object, it has a denoter.
 
 ## Header
 The table Header is all the stuff that falles <code>\< here ></code>. The data entries are in parentisis, and seperated by commas (<code>(...=...), (...=...)</code>). Inside, they contain the tag (left of the equals), and the data (right of the equals). The only accepted values are word-characters and the ampsterstand (&) for defining multiple things.
